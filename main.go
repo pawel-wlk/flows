@@ -6,7 +6,12 @@ import (
 )
 
 func main() {
-	k := 16
-	graph := graphs.NewHyperCube(k)
-	fmt.Println(graphs.Karp(graph, 0, (1 << uint(k))-1, k))
+	fmt.Println("k, flow, paths, time")
+	for k := 1; k <= 16; k++  {
+		for i:=0; i<100; i++ {
+			fmt.Printf("%d,", k)
+			graph := graphs.NewHyperCube(k)
+			graphs.Karp(graph, 0, (1 << uint(k))-1, k)
+		}
+	}
 }

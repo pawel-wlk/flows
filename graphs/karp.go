@@ -3,6 +3,7 @@ package graphs
 import (
 	"math"
 	"fmt"
+	"time"
 
 	"../binary"
 )
@@ -44,6 +45,7 @@ func bfs(graph [][]int, source int, end int, k int, pi []int) bool {
 }
 
 func Karp(graph [][]int, source int, end int, k int) int {
+	startTime := time.Now()
 	residualGraph := make([][]int, binary.PowOf2(k))
 
 	for u:=0; u<binary.PowOf2(k); u++ {
@@ -74,6 +76,5 @@ func Karp(graph [][]int, source int, end int, k int) int {
 		maxFlow += pathFlow
 	}
 
-	fmt.Println(paths)
-	return maxFlow
+	fmt.Printf("%d, %d, %d\n", maxFlow, paths, time.Since(startTime))
 }
