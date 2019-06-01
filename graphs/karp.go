@@ -44,7 +44,7 @@ func bfs(graph [][]int, source int, end int, k int, pi []int) bool {
 	return visited[end]
 }
 
-func Karp(graph [][]int, source int, end int, k int) int {
+func Karp(graph [][]int, source int, end int, k int) {
 	startTime := time.Now()
 	residualGraph := make([][]int, binary.PowOf2(k))
 
