@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"fmt"
 	"time"
+	"os"
+	"strconv"
 )
 
 func search(arr []int, searched int) bool {
@@ -72,65 +74,31 @@ func maxBPM(bpGraph [][]int) int {
 	return result
 }
 
-func glpk(graph [][]int)  {
-	fmt.Print("param n, integer, >= 2;\n" +
-			"/* number of nodes */\n" +
-			"\n" +
-			"set V, default {1..n};\n" +
-			"/* set of nodes */\n" +
-			"\n" +
-			"set E, within V cross V;\n" +
-			"/* set of arcs */\n" +
-			"\n" +
-			"param a{(i,j) in E}, > 0;\n" +
-			"/* a[i,j] is capacity of arc (i,j) */\n" +
-			"\n" +
-			"param s, symbolic, in V, default 1;\n" +
-			"/* source node */\n" +
-			"\n" +
-			"param t, symbolic, in V, != s, default n;\n" +
-			"/* sink node */\n" +
-			"\n" +
-			"var x{(i,j) in E}, >= 0, <= a[i,j];\n" +
-			"/* x[i,j] is elementary flow through arc (i,j) to be found */\n" +
-			"\n" +
-			"var flow, >= 0;\n" +
-			"/* total flow from s to t */\n" +
-			"\n" +
-			"s.t. node{i in V}:\n" +
-			"/* node[i] is conservation constraint for node i */\n" +
-			"\n" +
-			"	sum{(j,i) in E} x[j,i] + (if i = s then flow)\n" +
-			"	/* summary flow into node i through all ingoing arcs */\n" +
-			"\n" +
-			"	= /* must be equal to */\n" +
-			"\n" +
-			"	sum{(i,j) in E} x[i,j] + (if i = t then flow);\n" +
-			"	/* summary flow from node i through all outgoing arcs */\n" +
-			"\n" +
-			"maximize obj: flow;\n" +
-			"/* objective is to maximize the total flow through the network */\n" +
-			"\n" +
-			"solve;\n" +
-			"\n" +
-			"printf{1..56} \"=\"; printf \"\\n\";\n" +
-			"printf \"Maximum flow from node %s to node %s is %g\\n\\n\", s, t, flow;\n" +
-			"\n" +
-			"data;\n\n");
-	fmt.Println();
-	fmt.Printf("param n := %d;\n", len(graph) + 2)
-	fmt.Println();
-	fmt.Println("param : E : a :=");
-	for j, neighbours := range graph {
-		for _, i := range neighbours {
-			fmt.Printf("  %d %d %d\n", j + 1, i + 1, 1);
+func glpk(graph [][]int, k int, n int)  {
+	fmt.Printf("param n, integer, >= 2;\n\nset V, default {1..n};\n\nset E, within V cross V;\n\nparam a{(i,j) in E}, > 0;\n\nparam s, symbolic, in V, default 1;\n\nparam t, symbolic, in V, != s, default n;\n\nvar x{(i,j) in E}, >= 0, <= a[i,j];\n\nvar flow, >= 0;\n\ns.t. node{i in V}:\n\n	 sum{(j,i) in E} x[j,i] + (if i = s then flow)\n\n	 =\n\n	 sum{(i,j) in E} x[i,j] + (if i = t then flow);\n\nmaximize obj: flow;\n\nsolve;\n\nprintf{1..56} \"=\"; printf \"\\n\";\nprintf \"Maximum flow from node %%s to node %%s is %%g\\n\\n\", s, t, flow;\n\ndata;\n");
+	fmt.Printf("param n := %d;\n\n", (1 << uint(k+1)) + 2)
+	fmt.Printf("param : E : a :=\n")
+	for i := 0; i < 1 << uint(k); i++ {
+		fmt.Printf("\t1 %d 1\n", i+2)
+	}
+	for i := 0; i < 1 << uint(k); i++ {
+		for j := 0; j < n; j++ {
+			fmt.Printf("\t%d %d 1\n", i+2, (1 << uint(k)) + graph[i][j] + 2);
 		}
 	}
-	fmt.Println(";\n");
-	fmt.Println("end;");
+	for i := 0; i < 1 << uint(k); i++ {
+		fmt.Printf("\t%d %d 1\n", (1 << uint(k)) + i + 2, (1 << uint(k+1)) + 2);
+	}
+	fmt.Printf(";\nend;\n");
 }
 
 func main() {
+	if len(os.Args) >= 4 && os.Args[1] == "--glpk" {
+		k, _ := strconv.Atoi(os.Args[2])
+		i, _ := strconv.Atoi(os.Args[3])
+		glpk(generate(k, i), k, i)
+		return
+	}
 	reps := 100
 	fmt.Println("k, i, matches, time")
 	for k := 3; k<=10; k++ {
