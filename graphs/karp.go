@@ -46,6 +46,7 @@ func bfs(graph [][]int, source int, end int, k int, pi []int) bool {
 
 func Karp(graph [][]int, source int, end int, k int) {
 	startTime := time.Now()
+	paths = 0
 	residualGraph := make([][]int, binary.PowOf2(k))
 
 	for u:=0; u<binary.PowOf2(k); u++ {
